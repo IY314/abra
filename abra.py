@@ -3,8 +3,10 @@ import webbrowser as web
 import pyperclip
 import sys
 from os import getenv
-from locate import *
-
+try:
+    from locate import *
+except:
+    raise ImportError("This file needs locate.py to work: check https://github.com/mrfoogles/abra for more info.")
 def load_data(data):
     lines = data.split("\n")
     w = [] # words
@@ -19,40 +21,33 @@ home = getenv("HOME") # The folder Desktop, Documents, etc. are in
 f = "data.txt"
 datapaths = [f"{home}",f"{home}/Documents",f"{home}/Desktop"]
 
+def update_abra(e):
+    status = clone(github("mrfoogles","abra"))
+    if status == 0:
+        sys.exit(0)
+    else:
+        raise Exception("Could not clone repo")
+
 if __name__ == "__main__":
     try:
-        data = read(f)
-    except Exception as e:
-        print(f"Error reading file: {e}")
-        try:
-            data = locate(f,datapaths)
-        except Exception as e:
-            try:
-                  # The repository can do git pull and has the files needed
-                status = clone(github("mrfoogles","abra"))
-                if status == 0:
-                    print("Launch abra/abra.py instead now; the repo should have included a data.txt")
-                    sys.exit(0)
-                else:
-                    raise Exception("Unknown why")
-
-            except Exception as e:
-                print(f"Cloning {github('mrfoogles','abra')} failed: {e}")
-
-                try:
-                    # githubusercontent.com downloads directly from the repository
-                    #  even if you don't have git
-                    url = "https://raw.githubusercontent.com/mrfoogles/abra/working/data.txt"
-                    data = download(url,"data.txt")
-                except Exception as e:
-                    print(f"Failed to download data: {e}")
-                    try:
-                        # Ok, it's your problem now.
-                        data = wait("data.txt")
-                    except Exception as e:
-                        print(f"Error: {e}")
-                        print("Ok, I have no clue how to find this file.  Good luck.")
-                        os.exit()
+        data = trychain(
+            lambda e : read(f),
+            # Hey, want to use the one in Desktop?
+            lambda e : locate(f,datapaths),
+            # Repo can do git pull, and has all needed files
+            clone_abra,
+            # githubusercontent.com downloads directly from the repository
+            #  even if you don't have git
+            lambda e : download(
+                 "https://raw.githubusercontent.com/mrfoogles/abra/working/data.txt",
+                 f
+            ),
+            # Is the data somewhere I don't know?
+            lambda e : wait(f)
+        )
+    except:
+         print("Ok, I have no clue how to find this file.  Good luck.")
+         os.exit(1)
 
     # Sometimes there are extra lines of whitespace and it breaks because the number
     #  of lines is not a multiple of four

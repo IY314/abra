@@ -30,7 +30,12 @@ def clone(url):
 def download(url,dest=None):
     print(f"Downloading {dest} from {url}")
     response = requests.get(url)
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except Exception as e:
+        print(e)
+        raise Exception(f"Could not download {url}")
+
     if dest:
         with open(dest,mode="w") as f:
             f.write(response.text)
