@@ -7,6 +7,7 @@ try:
     from locate import *
 except:
     raise ImportError("This file needs locate.py to work: check https://github.com/mrfoogles/abra for more info.")
+
 def load_data(data):
     lines = data.split("\n")
     w = [] # words
@@ -20,6 +21,82 @@ def load_data(data):
 home = getenv("HOME") # The folder Desktop, Documents, etc. are in
 f = "data.txt"
 datapaths = [f"{home}",f"{home}/Documents",f"{home}/Desktop"]
+
+
+import os
+import requests
+
+def yn(message):
+    ans = input(message).strip()
+    if ans.lower() == "n":
+        return False
+    else:
+        return ans
+
+def tryall(*funcs):
+    if len(funcs) == 0:
+        raise Exception("trychain was called with 0 args")
+    arg = None
+    while True:
+        try:
+            return funcs[0](arg)
+        except Exception as e:
+            if len(funcs) == 0:
+                raise Exception("All functions in trychain failed")
+            else:
+                funcs = funcs[1:]
+                arg = e
+
+def pull(f):
+    status = os.system("git pull")
+    if status != 0:
+        print(f"git pull exited with status {status}")
+        raise Exception("Could not git pull")
+    return read(f)
+
+def read(name):
+    with open(name) as f:
+        return f.read()
+
+def github(user,repo):
+    return f"https://github.com/{user}/{repo}.git"
+
+def clone(url):
+    os.system(f"git clone {url}")
+
+def download(url,dest=None):
+    print(f"Downloading {dest} from {url}")
+    response = requests.get(url)
+    try:
+        response.raise_for_status()
+    except Exception as e:
+        print(e)
+        raise Exception(f"Could not download {url}")
+
+    if dest:
+        with open(dest,mode="w") as f:
+            f.write(response.text)
+    return response.text
+
+def locate(name,paths=[]):
+    j = os.path.join
+    for path in paths:
+        if os.path.exists(j(path,name)):
+            if input(f"Use {j(path,name)}? (y/n) ").strip().lower() == "y":
+                return read(j(path,name))
+
+    raise Exception(f"No paths were found for {name}")
+
+def wait(name):
+    ans = input(f"Use a different {name}? (path or n) ").strip()
+    if ans.lower() != "n":
+        try:
+            return read(name)
+        except Exception as e:
+            print(f"Could not read {ans}: {e}")
+            raise e
+    else:
+        raise Exception(f"User would not identify a {name}.")
 
 def clone_abra(e):
     if input("Clone repository to get data.txt? (y/n) ").strip().lower() != "n":
