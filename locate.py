@@ -2,12 +2,20 @@
 import os
 import requests
 
-def trychain(*funcs,e=None):
-    try:
-        return funcs[0](e)
-    except BaseException as e:
-        funcs.pop(0)
-        return trychain(funcs,e)
+def trychain(*funcs):
+    if len(funcs) == 0:
+        raise Exception("trychain was called with 0 args")
+    arg = None
+    while True:
+        try:
+            return funcs[0](arg)
+        except Exception as e:
+            if len(funcs) == 0:
+                raise Exception("All functions in trychain failed")
+            else:
+                funcs = funcs[1:]
+                arg = e
+
 
 def read(name):
     with open(name) as f:
