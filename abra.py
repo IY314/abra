@@ -21,6 +21,8 @@ def read_data(paths):
         try:
             with open(path,mode="r") as f:
                 data = f.read()
+        except:
+            pass
     if data:
         return data
     else:
@@ -28,7 +30,7 @@ def read_data(paths):
 
 home = getenv("HOME") # The folder Desktop, Documents, etc. are in
 f = "data.txt"
-datapaths = [f"{home}/{f}",f"{home}/Documents/{f}",f"{home}/Desktop/{f}"]
+datapaths = [f"./{f}",f"{home}/{f}",f"{home}/Documents/{f}",f"{home}/Desktop/{f}"]
 
 if __name__ == "__main__":
     data = read_data(datapaths)
