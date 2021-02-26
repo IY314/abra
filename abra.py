@@ -53,24 +53,27 @@ def datatxt(e):
         return read(f)
     else:
         raise Exception("No use data.txt")
+
+def getlist(e):
+    ans = yn("Try to download a list? (list number or n) ")
+    if ans:
+        return download(f"https://raw.githubusercontent.com/mrfoogles/abra/main/lists/{ans}",f)
+    else:
+        raise Exception("User say no")
+
 if __name__ == "__main__":
     print("If something breaks, try doing 'git pull' in terminal if you downloaded this with 'git clone https://github.com/mrfoogles/abra.git'")
     print("--Finding data.txt\n")
     try:
         data = tryall(
-            datatxt,
             # lists folder
             uselists,
-            # Is the data somewhere I don't know?
-            lambda e : wait(f),
+            datatxt,
+            getlist,
             # Hey, want to use the one in Desktop?
             lambda e : locate(f,datapaths),
-            # githubusercontent.com downloads directly from the repository
-            #  even if you don't have git
-            lambda e : download(
-                 "https://raw.githubusercontent.com/mrfoogles/abra/main/data.txt",
-                 f
-            ),
+            # Is the data somewhere I don't know?
+            lambda e : wait("data file"),
             clone_abra
         )
     except Exception as e:

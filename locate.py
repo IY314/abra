@@ -2,6 +2,13 @@
 import os
 import requests
 
+def yn(message):
+    ans = input(message).strip()
+    if ans.lower() == "n":
+        return False
+    else:
+        return ans
+
 def tryall(*funcs):
     if len(funcs) == 0:
         raise Exception("trychain was called with 0 args")
