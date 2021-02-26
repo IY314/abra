@@ -36,12 +36,26 @@ def clone_abra(e):
     else:
         raise Exception("User declined to clone repo")
 
+def uselists(e):
+    if os.path.isdir("lists") and os.listdir("lists") != []:
+        available = str(os.listdir("lists"))[1:-1]
+        print(f"Found lists in folder lists: {available}")
+        ans = input("Use one of these? (list name, or n) ").strip()
+        if ans.lower() != "n":
+            return read(os.path.join("lists",ans))
+        else:
+            raise Exception("User declined to use lists")
+    else:
+        raise Exception("No lists available")
+
 if __name__ == "__main__":
     print("If something breaks, try doing 'git pull' in terminal if you downloaded this with 'git clone https://github.com/mrfoogles/abra.git'")
     print("--Finding data.txt\n")
     try:
         data = tryall(
             lambda e : read(f),
+            # lists folder
+            uselists,
             # Is the data somewhere I don't know?
             lambda e : wait(f),
             # Hey, want to use the one in Desktop?

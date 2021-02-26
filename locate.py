@@ -57,8 +57,12 @@ def locate(name,paths=[]):
     raise Exception(f"No paths were found for {name}")
 
 def wait(name):
-    ans = input(f"Use a different {name}? (y/n) ").strip().lower()
-    if ans == "y":
-        return read(name)
+    ans = input(f"Use a different {name}? (path or n) ").strip()
+    if ans.lower() != "n":
+        try:
+            return read(name)
+        except Exception as e:
+            print(f"Could not read {ans}: {e}")
+            raise e
     else:
         raise Exception(f"User would not identify a {name}.")
