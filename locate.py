@@ -16,6 +16,12 @@ def tryall(*funcs):
                 funcs = funcs[1:]
                 arg = e
 
+def pull(f):
+    status = os.system("git pull")
+    if status != 0:
+        print(f"git pull exited with status {status}")
+        raise Exception("Could not git pull")
+    return read(f)
 
 def read(name):
     with open(name) as f:
@@ -43,7 +49,6 @@ def download(url,dest=None):
 
 def locate(name,paths=[]):
     j = os.path.join
-    print(f"Trying to find {name}")
     for path in paths:
         if os.path.exists(j(path,name)):
             if input(f"Use {j(path,name)}? (y/n) ").strip().lower() == "y":
@@ -52,8 +57,8 @@ def locate(name,paths=[]):
     raise Exception(f"No paths were found for {name}")
 
 def wait(name):
-    ans = input(f"Cannot find {name}; can you create a file named '{name}'? (y when finished, n if no) ").strip().lower()
+    ans = input(f"Use a different {name}? (y/n) ").strip().lower()
     if ans == "y":
         return read(name)
     else:
-        raise Exception(f"User would not create {name}.")
+        raise Exception(f"User would not identify a {name}.")

@@ -21,34 +21,44 @@ home = getenv("HOME") # The folder Desktop, Documents, etc. are in
 f = "data.txt"
 datapaths = [f"{home}",f"{home}/Documents",f"{home}/Desktop"]
 
-def update_abra(e):
-    status = clone(github("mrfoogles","abra"))
-    if status == 0:
-        sys.exit(0)
+def clone_abra(e):
+    if input("Clone repository to get data.txt? (y/n) ").strip().lower() != "n":
+        if os.path.exists("abra"):
+            print("The repository already exists; run abra/abra.py")
+            sys.exit(0)
+        else:
+            status = clone(github("mrfoogles","abra"))
+            if status == 0:
+                sys.exit(0)
+            else:
+                print("Could not clone repo")
+                raise Exception("Could not clone repo")
     else:
-        raise Exception("Could not clone repo")
+        raise Exception("User declined to clone repo")
 
 if __name__ == "__main__":
+    print("If something breaks, try doing 'git pull' in terminal if you downloaded this with 'git clone https://github.com/mrfoogles/abra.git'")
+    print("--Finding data.txt\n")
     try:
         data = tryall(
             lambda e : read(f),
+            # Is the data somewhere I don't know?
+            lambda e : wait(f),
             # Hey, want to use the one in Desktop?
             lambda e : locate(f,datapaths),
-            # Repo can do git pull, and has all needed files
-            clone_abra,
             # githubusercontent.com downloads directly from the repository
             #  even if you don't have git
             lambda e : download(
-                 "https://raw.githubusercontent.com/mrfoogles/abra/working/data.txt",
+                 "https://raw.githubusercontent.com/mrfoogles/abra/main/data.txt",
                  f
             ),
-            # Is the data somewhere I don't know?
-            lambda e : wait(f)
+            clone_abra
         )
-    except:
-         print("Ok, I have no clue how to find this file.  Good luck.")
-         os.exit(1)
-
+    except Exception as e:
+        print(f"Error: {e}")
+        print("Ok, I have no clue how to find this file.  Good luck.")
+        sys.exit(1)
+    print("--Found data.txt, starting\n")
     # Sometimes there are extra lines of whitespace and it breaks because the number
     #  of lines is not a multiple of four
     data = data.strip()
