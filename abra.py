@@ -134,7 +134,11 @@ def datatxt(e):
 def getlist(e):
     ans = yn("Try to download a list? (list number or n) ")
     if ans:
-        return download(f"https://raw.githubusercontent.com/mrfoogles/abra/main/lists/{ans}",f)
+        if os.path.isfile("lists"):
+            os.rename("lists","why_did_you_have_a_file_named_lists")
+        if not os.path.isdir("lists"):
+            os.mkdir("lists")
+        return download(f"https://raw.githubusercontent.com/mrfoogles/abra/main/lists/{ans}",os.path.join("lists",ans))
     else:
         raise Exception("User say no")
 
