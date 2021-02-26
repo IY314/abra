@@ -30,7 +30,7 @@ def update_abra(e):
 
 if __name__ == "__main__":
     try:
-        data = trychain(
+        data = tryall(
             lambda e : read(f),
             # Hey, want to use the one in Desktop?
             lambda e : locate(f,datapaths),

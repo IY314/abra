@@ -2,7 +2,7 @@
 import os
 import requests
 
-def trychain(*funcs):
+def tryall(*funcs):
     if len(funcs) == 0:
         raise Exception("trychain was called with 0 args")
     arg = None
