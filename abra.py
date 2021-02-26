@@ -48,12 +48,17 @@ def uselists(e):
     else:
         raise Exception("No lists available")
 
+def datatxt(e):
+    if os.path.isfile(f) and input(f"Use {f}? (y/n) ").strip().lower() == "y":
+        return read(f)
+    else:
+        raise Exception("No use data.txt")
 if __name__ == "__main__":
     print("If something breaks, try doing 'git pull' in terminal if you downloaded this with 'git clone https://github.com/mrfoogles/abra.git'")
     print("--Finding data.txt\n")
     try:
         data = tryall(
-            lambda e : read(f),
+            datatxt,
             # lists folder
             uselists,
             # Is the data somewhere I don't know?
