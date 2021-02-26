@@ -1,8 +1,9 @@
 
 import webbrowser as web
 import pyperclip
-from sys import argv
+import sys
 from os import getenv
+from locate import *
 
 def load_data(data):
     lines = data.split("\n")
@@ -14,26 +15,44 @@ def load_data(data):
         d.append(lines[i+1])
     return(w,d)
 
-def read_data(paths):
-    # Search a number of paths to read a file, so you can put it in whichever
-    data = None
-    for path in paths:
-        try:
-            with open(path,mode="r") as f:
-                data = f.read()
-        except:
-            pass
-    if data:
-        return data
-    else:
-        raise Exception("No paths succeeded for 'data.txt':\n\tTried all in {paths}")
-
 home = getenv("HOME") # The folder Desktop, Documents, etc. are in
 f = "data.txt"
-datapaths = [f"./{f}",f"{home}/{f}",f"{home}/Documents/{f}",f"{home}/Desktop/{f}"]
+datapaths = [f"{home}",f"{home}/Documents",f"{home}/Desktop"]
 
 if __name__ == "__main__":
-    data = read_data(datapaths)
+    try:
+        data = read(f)
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        try:
+            data = locate(f,datapaths)
+        except Exception as e:
+            try:
+                  # The repository can do git pull and has the files needed
+                status = clone(github("mrfoogles","abra"))
+                if status == 0:
+                    print("Launch abra/abra.py instead now; the repo should have included a data.txt")
+                    sys.exit(0)
+                else:
+                    raise Exception("Unknown why")
+
+            except Exception as e:
+                print(f"Cloning {github('mrfoogles','abra')} failed: {e}")
+
+                try:
+                    # githubusercontent.com downloads directly from the repository
+                    #  even if you don't have git
+                    url = "https://raw.githubusercontent.com/mrfoogles/abra/working/data.txt"
+                    data = download(url,"data.txt")
+                except Exception as e:
+                    print(f"Failed to download data: {e}")
+                    try:
+                        # Ok, it's your problem now.
+                        data = wait("data.txt")
+                    except Exception as e:
+                        print(f"Error: {e}")
+                        print("Ok, I have no clue how to find this file.  Good luck.")
+                        os.exit()
 
     # Sometimes there are extra lines of whitespace and it breaks because the number
     #  of lines is not a multiple of four
@@ -56,8 +75,8 @@ if __name__ == "__main__":
     print(f"Increment: {increment}")
 
     # you can do 'python3 abra.py <word>', and it skips to that word
-    if len(argv) > 1: # argv[0] = <program name>
-        while words[0] != argv[1]:
+    if len(sys.argv) > 1: # sys.argv[0] = <program name>
+        while words[0] != sys.argv[1]:
             print(f"Skipping {words.pop(0)}")
             defs.pop(0)
 
