@@ -1,30 +1,14 @@
+### By @mrfoogles
 
 import webbrowser as web
 import pyperclip
 import sys
-from os import getenv
-try:
-    from locate import *
-except:
-    raise ImportError("This file needs locate.py to work: check https://github.com/mrfoogles/abra for more info.")
-
-def load_data(data):
-    lines = data.split("\n")
-    w = [] # words
-    d = [] # definitions
-    for i in range(0,len(lines),4):
-        # ':-1' because each word ends in a :
-        w.append(lines[i].split(" ")[1][:-1]) # splice syntax
-        d.append(lines[i+1])
-    return(w,d)
-
-home = getenv("HOME") # The folder Desktop, Documents, etc. are in
-f = "data.txt"
-datapaths = [f"{home}",f"{home}/Documents",f"{home}/Desktop"]
-
-
 import os
 import requests
+
+home = os.getenv("HOME") # The folder Desktop, Documents, etc. are in
+f = "data.txt"
+datapaths = [f"{home}",f"{home}/Documents",f"{home}/Desktop"]
 
 def yn(message):
     ans = input(message).strip()
@@ -33,19 +17,6 @@ def yn(message):
     else:
         return ans
 
-def tryall(*funcs):
-    if len(funcs) == 0:
-        raise Exception("trychain was called with 0 args")
-    arg = None
-    while True:
-        try:
-            return funcs[0](arg)
-        except Exception as e:
-            if len(funcs) == 0:
-                raise Exception("All functions in trychain failed")
-            else:
-                funcs = funcs[1:]
-                arg = e
 
 def pull(f):
     status = os.system("git pull")
@@ -98,81 +69,93 @@ def wait(name):
     else:
         raise Exception(f"User would not identify a {name}.")
 
-def clone_abra(e):
-    if input("Clone repository to get data.txt? (y/n) ").strip().lower() != "n":
-        if os.path.exists("abra"):
-            print("The repository already exists; run abra/abra.py")
-            sys.exit(0)
-        else:
-            status = clone(github("mrfoogles","abra"))
-            if status == 0:
-                sys.exit(0)
+def tryall(*funcs):
+    if len(funcs) == 0:
+        raise Exception("trychain was called with 0 args")
+    arg = None
+    while True:
+        try:
+            return funcs[0](arg)
+        except Exception as e:
+            if len(funcs) == 0:
+                raise Exception("")
             else:
-                print("Could not clone repo")
-                raise Exception("Could not clone repo")
-    else:
-        raise Exception("User declined to clone repo")
+                funcs = funcs[1:]
+                arg = e
+    
 
-def uselists(e):
-    if os.path.isdir("lists") and os.listdir("lists") != []:
-        available = str(os.listdir("lists"))[1:-1]
-        print(f"Found lists in folder lists: {available}")
-        ans = input("Use one of these? (list name, or n) ").strip()
-        if ans.lower() != "n":
-            return read(os.path.join("lists",ans))
+def load_data(data):
+    lines = data.split("\n")
+    w = [] # words
+    d = [] # definitions
+    for i in range(0,len(lines),4):
+        # ':-1' because each word ends in a :
+        w.append(lines[i].split(" ")[1][:-1]) # splice syntax
+        d.append(lines[i+1])
+    return(w,d)
+
+
+def request_list():
+    print("--Finding data.txt\n")
+
+    def local_list(e):
+        if os.path.isdir("lists") and os.listdir("lists") != []:
+            available = str(os.listdir("lists"))[1:-1]
+            print(f"Found lists in folder lists: {available}")
+            ans = input("Use one of these? (list name, or n) ").strip()
+            if ans.lower() != "n":
+                return read(os.path.join("lists",ans))
+            else:
+                raise Exception("User declined to use lists")
         else:
-            raise Exception("User declined to use lists")
-    else:
-        raise Exception("No lists available")
+            raise Exception("No lists available")
 
-def datatxt(e):
-    if os.path.isfile(f) and input(f"Use {f}? (y/n) ").strip().lower() == "y":
-        return read(f)
-    else:
-        raise Exception("No use data.txt")
+    def local_txt(e):
+        if os.path.isfile(f) and yn(f"Use {f}? (y/n)") == "y":
+            return read(f)
+        else:
+            raise Exception("No use data.txt")
 
-def getlist(e):
-    ans = yn("Try to download a list? (list number or n) ")
-    if ans:
-        if os.path.isfile("lists"):
-            os.rename("lists","why_did_you_have_a_file_named_lists")
-        if not os.path.isdir("lists"):
-            os.mkdir("lists")
-        return download(f"https://raw.githubusercontent.com/mrfoogles/abra/main/lists/{ans}",os.path.join("lists",ans))
-    else:
-        raise Exception("User say no")
+    def download_list(e):
+        ans = yn("Try to download a list? (list number or n) ")
+        if ans:
+            if os.path.isfile("lists"):
+                os.rename("lists","why_did_you_have_a_file_named_lists")
+            if not os.path.isdir("lists"):
+                os.mkdir("lists")
+            return download(f"https://raw.githubusercontent.com/mrfoogles/abra/main/lists/{ans}",os.path.join("lists",ans))
+        else:
+            raise Exception("User say no")
+
+    return tryall(
+        # lists folder
+        local_list,
+        local_txt,
+        download_list,
+        # Hey, want to use the one in Desktop?
+        lambda e : locate(f,datapaths),
+        # Is the data somewhere I don't know?
+        lambda e : wait("data file")
+    )
 
 if __name__ == "__main__":
     print("If something breaks, try doing 'git pull' in terminal if you downloaded this with 'git clone https://github.com/mrfoogles/abra.git'")
-    print("--Finding data.txt\n")
+    print("'python3 abra.py <word>' will skip to that word")
+    print("Ctrl-c will quit shell programs like this one")
+    
     try:
-        data = tryall(
-            # lists folder
-            uselists,
-            datatxt,
-            getlist,
-            # Hey, want to use the one in Desktop?
-            lambda e : locate(f,datapaths),
-            # Is the data somewhere I don't know?
-            lambda e : wait("data file"),
-            clone_abra
-        )
+        data = request_list()
     except Exception as e:
-        print(f"Error: {e}")
+        if str(e) != "":
+            print(f"Error: {e}")
         print("Ok, I have no clue how to find this file.  Good luck.")
         sys.exit(1)
+
     print("--Found data.txt, starting\n")
     # Sometimes there are extra lines of whitespace and it breaks because the number
     #  of lines is not a multiple of four
     data = data.strip()
-    #  \n means start a new line
-    #  what this means:
-    #   hello\n
-    #   a greeting\n
-    #   \n # inserted by google docs as a page break
-    #   - hello, person!
-    #  ...
-    #  number of lines is now not a multiple of four because there's an extra
+    # Remove page breaks
     data.replace("\n\n","\n")
 
     words, defs = load_data(data)
