@@ -53,7 +53,7 @@ def locate(name,paths=[]):
     j = os.path.join
     for path in paths:
         if os.path.exists(j(path,name)):
-            if input(f"Use {j(path,name)}? (y/n) ").strip().lower() == "y":
+            if input(f"Use {j(path,name)}? (type y or n) ").strip().lower() == "y":
                 return read(j(path,name))
 
     raise Exception(f"No paths were found for {name}")
@@ -103,7 +103,7 @@ def request_list():
         if os.path.isdir("lists") and os.listdir("lists") != []:
             available = str(os.listdir("lists"))[1:-1]
             print(f"Found lists in folder lists: {available}")
-            ans = input("Use one of these? (list name, or n) ").strip()
+            ans = input("Use one of these? (type preferred list or n) ").strip()
             if ans.lower() != "n":
                 return read(os.path.join("lists",ans))
             else:
@@ -112,7 +112,7 @@ def request_list():
             raise Exception("No lists available")
 
     def local_txt(e):
-        if os.path.isfile(f) and yn(f"Use {f}? (y/n)") == "y":
+        if os.path.isfile(f) and yn(f"Use {f}? (type y or n)") == "y":
             return read(f)
         else:
             raise Exception("No use data.txt")
@@ -163,19 +163,19 @@ if __name__ == "__main__":
 
     percent_done = 0.0
     increment = 100 / len(words)
-    print(f"Percent: {round(percent_done,2)}")
-    print(f"Increment: {increment}")
 
     # you can do 'python3 abra.py <word>', and it skips to that word
-    if len(sys.argv) > 1: # sys.argv[0] = <program name>
+    if len(sys.argv) > 1:
+        print(f"Skipping to {sys.argv[1]}")
         while words[0] != sys.argv[1]:
-            print(f"Skipping {words.pop(0)}")
+            words.pop(0)
             defs.pop(0)
 
             # make sure the percentage starts at right amount
             #  when you skip forward
             percent_done += increment
-        print(f"Starting at {round(percent_done,2)}%")
+    
+    print(f"Progress: {round(percent_done,2)}")
 
     def newtab(url):
         web.open(url,new=2)
@@ -183,14 +183,13 @@ if __name__ == "__main__":
     for i in range(0,len(words)):
         input("press enter for next word")
 
-        print(f"Now {round(percent_done,2)}% done")
-        percent_done += increment
-
-        print(words[i])
+        print(f"{round(percent_done,2)}% done, {round(percent_done+increment,2)} after {words[i]}")
+        print("Copying definition, opening tabs...")
 
         pyperclip.copy(defs[i])
-        print("copied definition")
 
         newtab(f"https://etymonline.com/search?q={words[i]}")
         newtab(f"https://www.google.com/search?q={words[i]}+synonyms&source=lmns&hl=en")
         newtab(f"https://www.google.com/search?q={words[i]}&tbm=isch")
+
+        percent_done += increment
