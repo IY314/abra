@@ -59,10 +59,10 @@ def locate(name,paths=[]):
     raise Exception(f"No paths were found for {name}")
 
 def wait(name):
-    ans = input(f"Use a different {name}? (path or n) ").strip()
-    if ans.lower() != "n":
+    ans = yn(f"Use a different {name}? (path or n) ")
+    if ans:
         try:
-            return read(name)
+            return read(ans)
         except Exception as e:
             print(f"Could not read {ans}: {e}")
             raise e
@@ -85,6 +85,7 @@ def tryall(*funcs):
     
 
 def load_data(data):
+    data = data.strip().replace("\n\n","\n")
     lines = data.split("\n")
     w = [] # words
     d = [] # definitions
@@ -96,7 +97,7 @@ def load_data(data):
 
 
 def request_list():
-    print("--Finding data.txt\n")
+    print("\n--Finding data.txt")
 
     def local_list(e):
         if os.path.isdir("lists") and os.listdir("lists") != []:
@@ -135,7 +136,7 @@ def request_list():
         # Hey, want to use the one in Desktop?
         lambda e : locate(f,datapaths),
         # Is the data somewhere I don't know?
-        lambda e : wait("data file")
+        lambda e : wait("data.txt")
     )
 
 if __name__ == "__main__":
@@ -151,7 +152,7 @@ if __name__ == "__main__":
         print("Ok, I have no clue how to find this file.  Good luck.")
         sys.exit(1)
 
-    print("--Found data.txt, starting\n")
+    print("\n--Found data.txt, starting")
     # Sometimes there are extra lines of whitespace and it breaks because the number
     #  of lines is not a multiple of four
     data = data.strip()
