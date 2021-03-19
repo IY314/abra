@@ -166,8 +166,9 @@ if __name__ == "__main__":
 
     # you can do 'python3 abra.py <word>', and it skips to that word
     if len(sys.argv) > 1:
-        print(f"  Skipping to {sys.argv[1]}")
-        while words[0] != sys.argv[1]:
+        skipto = " ".join(sys.argv[1:])
+        print(f"  Skipping to {skipto}")
+        while words[0] != skipto:
             words.pop(0)
             defs.pop(0)
 
