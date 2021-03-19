@@ -91,7 +91,7 @@ def load_data(data):
     d = [] # definitions
     for i in range(0,len(lines),4):
         # ':-1' because each word ends in a :
-        w.append(lines[i].split(" ")[1][:-1]) # splice syntax
+        w.append(lines[i].split(" ")[1:][:-1]) # splice syntax
         d.append(lines[i+1])
     return(w,d)
 
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 
     # you can do 'python3 abra.py <word>', and it skips to that word
     if len(sys.argv) > 1:
-        print(f"Skipping to {sys.argv[1]}")
+        print(f"  Skipping to {sys.argv[1]}")
         while words[0] != sys.argv[1]:
             words.pop(0)
             defs.pop(0)
@@ -174,8 +174,6 @@ if __name__ == "__main__":
             # make sure the percentage starts at right amount
             #  when you skip forward
             percent_done += increment
-    
-    print(f"Progress: {round(percent_done,2)}")
 
     def newtab(url):
         web.open(url,new=2)
@@ -183,7 +181,9 @@ if __name__ == "__main__":
     for i in range(0,len(words)):
         input("press enter for next word")
 
-        print(f"{round(percent_done,2)}% done, {round(percent_done+increment,2)} after {words[i]}")
+        if percent_done > 0:
+            print(f"{round(percent_done,2)}% done!")
+
         print("Copying definition, opening tabs...")
 
         pyperclip.copy(defs[i])
