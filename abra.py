@@ -91,7 +91,8 @@ def load_data(data):
     d = [] # definitions
     for i in range(0,len(lines),4):
         # ':-1' because each word ends in a :
-        w.append(lines[i].split(" ")[1:][:-1]) # splice syntax
+        word = " ".join(lines[i].split(" ")[1:])[:-1]
+        w.append(word)
         d.append(lines[i+1])
     return(w,d)
 
@@ -169,6 +170,7 @@ if __name__ == "__main__":
         skipto = " ".join(sys.argv[1:])
         print(f"  Skipping to {skipto}")
         while words[0] != skipto:
+            #print(f"Skipping '{words[0]}'")
             words.pop(0)
             defs.pop(0)
 
